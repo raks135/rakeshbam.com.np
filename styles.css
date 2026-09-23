@@ -149,15 +149,63 @@ kbd {
    ========================================================= */
 .loader { display: none; }
 .loader.is-on {
-  display: flex; position: fixed; inset: 0; z-index: 200;
-  flex-direction: column; justify-content: flex-end;
-  padding: var(--gutter); background: var(--ink); color: var(--bg);
+  display: grid; place-items: center; position: fixed; inset: 0; z-index: 200;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(var(--accent-rgb), .13), transparent 42%),
+    var(--bg);
+  color: var(--ink);
 }
-.loader-inner { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
-.loader-name { font: 400 clamp(28px, 5vw, 56px)/1 var(--font-serif); font-style: italic; }
-.loader-count { font: 500 clamp(56px, 11vw, 160px)/.8 var(--font-sans); letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
-.loader-bar { margin-top: 24px; height: 2px; background: color-mix(in srgb, var(--bg) 18%, transparent); }
-.loader-bar span { display: block; height: 100%; width: 100%; transform-origin: 0 50%; transform: scaleX(0); background: var(--accent); }
+.loader-stage { display: grid; justify-items: center; gap: clamp(20px, 4vh, 36px); width: min(460px, 100%); }
+
+/* Infinity loop */
+.loader-inf { width: min(320px, 78vw); height: auto; overflow: visible; }
+.loader-inf .stop-a { stop-color: var(--accent); }
+.loader-inf .stop-b { stop-color: var(--accent-2); }
+.inf-track { fill: none; stroke: var(--line-2); stroke-width: 1.2; }
+.inf-progress {
+  fill: none; stroke: url(#loader-grad); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 100; stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 5px rgba(var(--accent-rgb), .6));
+}
+.inf-runner {
+  fill: none; stroke: var(--ink); stroke-width: 3.4; stroke-linecap: round;
+  stroke-dasharray: 7 93; animation: inf-run 1.6s linear infinite;
+  filter: drop-shadow(0 0 6px var(--accent-2));
+}
+@keyframes inf-run { to { stroke-dashoffset: -100; } }
+
+/* Terminal */
+.loader-term {
+  width: 100%; border-radius: 14px; overflow: hidden;
+  background: var(--surface-solid); border: 1px solid var(--line-2);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .5);
+  font: 400 13px/1.75 var(--font-mono);
+}
+.term-bar {
+  display: flex; align-items: center; gap: 7px; padding: 10px 14px;
+  border-bottom: 1px solid var(--line); color: var(--ink-3); font-size: 11.5px;
+}
+.term-bar i { width: 10px; height: 10px; border-radius: 50%; }
+.term-bar i:nth-child(1) { background: #ff5f57; }
+.term-bar i:nth-child(2) { background: #febc2e; }
+.term-bar i:nth-child(3) { background: #28c840; }
+.term-bar span { margin-left: 8px; }
+.term-pct { margin-left: auto; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; }
+.term-body { padding: 14px 16px 16px; height: calc(7 * 1.75em + 30px); white-space: pre; overflow: hidden; color: var(--ink); }
+.term-body .ln { display: block; min-height: 1.75em; }
+.term-body .cmd::before { content: "$ "; color: var(--accent); }
+.term-body .out { color: var(--ink-2); }
+.term-body .ok { color: #15803d; }
+:root[data-theme="dark"] .term-body .ok { color: #22c55e; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .term-body .ok { color: #22c55e; } }
+.term-body .bar { color: var(--accent-2); }
+.term-caret {
+  display: inline-block; width: .6em; height: 1.15em; margin-left: 2px; vertical-align: -.2em;
+  background: var(--accent); animation: caret 1s steps(1) infinite;
+}
+@keyframes caret { 50% { opacity: 0; } }
+@media (max-width: 420px) { .loader-term { font-size: 11.5px; } }
 
 /* =========================================================
    Custom cursor

@@ -257,6 +257,7 @@
     var loader = $(".loader");
     var seen = false;
     try { seen = sessionStorage.getItem("introSeen") === "1"; } catch (e) {}
+    if (/[?&]intro\b/.test(location.search)) seen = false; // ?intro replays it
     if (!motion || seen || !loader) {
       if (loader) loader.remove();
       done();
@@ -265,14 +266,59 @@
     try { sessionStorage.setItem("introSeen", "1"); } catch (e) {}
     loader.classList.add("is-on");
     if (lenis) lenis.stop();
+
     var count = $("[data-loader-count]", loader);
-    var bar = $(".loader-bar span", loader);
-    var o = { v: 0 };
-    gsap.set(loader, { clipPath: "inset(0% 0% 0% 0%)" });
-    gsap.timeline({ onComplete: function () { loader.remove(); if (lenis) lenis.start(); } })
-      .to(o, { v: 100, duration: 1.3, ease: "power2.inOut", onUpdate: function () { count.textContent = Math.round(o.v); } })
-      .to(bar, { scaleX: 1, duration: 1.3, ease: "power2.inOut" }, 0)
-      .to(loader, { clipPath: "inset(0% 0% 100% 0%)", duration: 1, ease: "expo.inOut" }, "+=.1")
+    var ring = $(".inf-progress", loader);
+    var term = $("[data-term]", loader);
+    var BAR_FROM = 64, BAR_TO = 97;
+    var script = [
+      { at: 0,  cls: "cmd", text: "whoami" },
+      { at: 10, cls: "out", text: "rakesh bam · solution architect @ IQVIA" },
+      { at: 26, cls: "cmd", text: "load --experience --since 2016" },
+      { at: 42, cls: "ok",  text: "✓ " + years + "+ years · 3 companies · 6 roles" },
+      { at: 56, cls: "cmd", text: "build --portfolio" },
+      { at: BAR_FROM, cls: "bar", bar: true },
+      { at: 99, cls: "ok",  text: "✓ ready — welcome" }
+    ];
+    var lines = [], next = 0, o = { v: 0 };
+    var caret = document.createElement("span");
+    caret.className = "term-caret";
+
+    function barText(p) {
+      var n = 20, f = Math.round((p / 100) * n);
+      return "[" + "█".repeat(f) + "░".repeat(n - f) + "] " + ("  " + Math.round(p)).slice(-3) + "%";
+    }
+    // Each frame: add lines whose threshold has passed, type them out, sync ring + counter.
+    function tick() {
+      var p = o.v;
+      while (next < script.length && p >= script[next].at) {
+        var el = document.createElement("span");
+        el.className = "ln " + script[next].cls;
+        term.appendChild(el);
+        lines.push({ el: el, item: script[next], typed: 0 });
+        next++;
+      }
+      lines.forEach(function (l) {
+        if (l.item.bar) {
+          l.el.textContent = barText(Math.min(100, Math.max(0, ((p - BAR_FROM) / (BAR_TO - BAR_FROM)) * 100)));
+        } else if (l.typed < l.item.text.length) {
+          l.typed = Math.min(l.item.text.length, l.typed + 2);
+          l.el.textContent = l.item.text.slice(0, l.typed);
+        }
+      });
+      if (lines.length) lines[lines.length - 1].el.appendChild(caret);
+      count.textContent = Math.round(p);
+      ring.style.strokeDashoffset = 100 - p;
+    }
+    gsap.ticker.add(tick);
+
+    gsap.set(loader, { clipPath: "circle(80% at 50% 50%)" });
+    gsap.timeline({ onComplete: function () { gsap.ticker.remove(tick); loader.remove(); if (lenis) lenis.start(); } })
+      .from(".loader-stage", { opacity: 0, y: 18, scale: 0.97, duration: 0.5, ease: "power3.out" })
+      .to(o, { v: 100, duration: 2.2, ease: "power1.inOut" }, 0.1)
+      .to(".loader-inf", { scale: 1.08, duration: 0.35, ease: "power2.out" }, "+=.3")
+      .to(".loader-stage", { scale: 0.85, opacity: 0, duration: 0.8, ease: "expo.inOut" }, "+=.05")
+      .to(loader, { clipPath: "circle(0% at 50% 50%)", duration: 1, ease: "expo.inOut" }, "<")
       .add(done, "-=.55");
   }
 
