@@ -552,6 +552,20 @@ kbd {
 
 .card-edu, .card-cert { justify-content: flex-end; min-height: 200px; }
 .card-cert { background: linear-gradient(135deg, rgba(var(--accent-rgb), .1), transparent 60%), var(--surface-solid); }
+.cert-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+.cert-list li {
+  display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 12px;
+  align-items: center; padding: 12px; border-radius: 14px;
+  border: 1px solid var(--line); background: var(--bg);
+  transition: transform .4s var(--ease), border-color .3s;
+}
+.cert-list li:hover { transform: translateY(-3px); border-color: rgba(var(--accent-rgb), .5); }
+.cert-list .glyph {
+  grid-row: span 2; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 11px;
+  font: 600 13px/1 var(--font-mono); background: var(--bg-2); color: var(--accent); border: 1px solid var(--line);
+}
+.cert-list h3 { font-size: 15px; font-weight: 500; margin: 0; }
+.cert-list small { font: 400 12px/1.3 var(--font-mono); color: var(--ink-3); }
 
 /* =========================================================
    Expertise
